@@ -1,0 +1,56 @@
+version: '3.4'
+
+services:
+
+  app_webserver_php:
+    container_name: app_webserver_php
+    depends_on:
+      - app_mariadb
+    links:
+      - app_mariadb
+      - app_redis
+    build:
+      dockerfile: ./config/php72/Dockerfile
+      context: ./
+    restart: always
+    env_file:
+       - ./config/apache/environment.env
+    ports:
+       - "80:80"
+       - "443:443"
+    volumes:
+        - "./www:/var/www"
+        - "./config/apache/sites-enabled:/etc/apache2/sites-enabled"
+
+  app_redis:
+    image: redis
+    container_name: app_redis
+    restart: always
+    expose:
+      - 9580
+
+  app_mariadb:
+    image: mariadb:10.2
+    container_name: app_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: grss
+      MYSQL_DATABASE: grss
+      MYSQL_USER: grss
+      MYSQL_PASSWORD: grss
+    restart: always
+    volumes:
+      - ${PWD}/config/mariadb:/var/lib/mysql
+
+  app_mariadb_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: app_mariadb_phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=app_mariadb
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - /sessions
+    links:
+      - app_mariadb
