@@ -10,7 +10,7 @@ services:
       - app_mariadb
       - app_redis
     build:
-      dockerfile: ./config/php72/Dockerfile
+      dockerfile: ./config/php56/Dockerfile
       context: ./
     restart: always
     env_file:
